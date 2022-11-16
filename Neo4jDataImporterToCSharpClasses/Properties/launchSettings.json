@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Neo4jDataImporterToCSharpClasses": {
+      "commandName": "Project",
+      "commandLineArgs": "--fileIn \"d:\\temp\\test-importer-model.json\" --folderOut \"d:\\temp\\generated\""
+    }
+  }
+}
