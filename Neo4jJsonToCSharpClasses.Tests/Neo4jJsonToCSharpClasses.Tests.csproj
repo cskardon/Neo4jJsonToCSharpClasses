@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CypherWorkbench\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Neo4jDataImporterToCSharpClasses\Neo4jJsonToCSharpClasses.csproj" />
   </ItemGroup>
 

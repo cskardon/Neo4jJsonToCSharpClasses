@@ -2,9 +2,9 @@
 
 namespace Neo4jJsonToCSharpClasses;
 
-using System.Reflection.Metadata.Ecma335;
+using Neo4jJsonToCSharpClasses.CypherWorkbench;
 
-internal static class Generate
+public static class Generate
 {
     public const string BaseNodeClass = @"public abstract class NodeBase
 {
@@ -15,7 +15,7 @@ internal static class Generate
 
     public static string? Labels { get; private set; }
 }";
-  
+
     public const string BaseRelationshipClass = @"public abstract class RelationshipBase
 {
     protected RelationshipBase(string type)
@@ -26,15 +26,30 @@ internal static class Generate
     public static string? Type { get; private set; }
 }";
 
-    internal static class OutputNode
+    private static IEnumerable<string>? GenerateProperties(ICollection<IProperty>? properties, bool upperCamelCaseProperties)
     {
-        internal static string Class(DataImporterNode dataImporterNode)
-        {
-            var properties = (GenerateProperties(dataImporterNode.Properties.Cast<IProperty>().ToList()) ?? Array.Empty<string>()).ToList();
-            var propertiesString = (properties.Any()) ? 
-                $@"{string.Join($"{Environment.NewLine}    ", properties)}
+        var output = new List<string>();
+        foreach (var property in properties) output.Add(GenerateProperty(property, upperCamelCaseProperties));
 
-    " 
+        return output;
+    }
+
+    private static string GenerateProperty(IProperty property, bool upperCamelCaseProperty)
+    {
+        var name = upperCamelCaseProperty ? property.Name.ToUpperCamelCase() : property.Name;
+
+        return $"public {property.Type.ToCSharpType()} {name} {{get; set;}}";
+    }
+
+    public static class OutputNode
+    {
+        public static string Class<T>(INode<T> dataImporterNode, bool upperCamelCaseProperties) where T : IProperty
+        {
+            var properties = (GenerateProperties(dataImporterNode.Properties.Cast<IProperty>().ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
+            var propertiesString = properties.Any()
+                ? $@"{string.Join($"{Environment.NewLine}    ", properties)}
+
+    "
                 : string.Empty;
 
             return $@"
@@ -45,18 +60,18 @@ public class {dataImporterNode.Label}: NodeBase
 }}";
         }
     }
-    
-    internal static class OutputRelationship
+
+    public static class OutputRelationship
     {
-        internal static string Class(DataImporterRelationship dataImporterRelationship, string startNode, string endNode)
+        public static string Class<T>(IRelationship<T> dataImporterRelationship, string startNode, string endNode, bool upperCamelCaseProperties) where T : IProperty
         {
             var type = dataImporterRelationship.Type.ToUpperCamelCase();
-            var properties = (GenerateProperties(dataImporterRelationship.Properties.Cast<IProperty>().ToList()) ?? Array.Empty<string>()).ToList();
+            var properties = (GenerateProperties(dataImporterRelationship.Properties.Cast<IProperty>().ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
 
-            var propertiesString = (properties.Any()) ? 
-                $@"{string.Join($"{Environment.NewLine}    ", properties)}
+            var propertiesString = properties.Any()
+                ? $@"{string.Join($"{Environment.NewLine}    ", properties)}
 
-    " 
+    "
                 : string.Empty;
 
             return $@"
@@ -69,32 +84,38 @@ public class {type}: RelationshipBase
         :base(""{dataImporterRelationship.Type}"") {{}}
 }}";
         }
-    }
-    
-    private static IEnumerable<string>? GenerateProperties(ICollection<IProperty>? properties)
-    {
-        var output = new List<string>();
-        foreach (var property in properties)
+
+        public static string Class(RelationshipNormalized relationship, IDictionary<string, CypherWorkbenchNode> nodes, bool upperCamelCaseProperties)
         {
-            output.Add(GenerateProperty(property));
+            var type = relationship.Type.ToUpperCamelCase();
+            var properties = (GenerateProperties(relationship.Properties.Cast<IProperty>().ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
+
+            var examples = relationship.SourceAndTargets.Select(x => GenerateExamples(relationship.Type, x.SourceNode, x.TargetNode, nodes));
+            var propertiesString = properties.Any()
+                ? $@"{string.Join($"{Environment.NewLine}    ", properties)}
+
+    "
+                : string.Empty;
+
+            return $@"
+///<summary>
+{string.Join(Environment.NewLine, examples)}
+///</summary>
+public class {type}: RelationshipBase
+{{
+    {propertiesString}public {type}()
+        :base(""{relationship.Type}"") {{}}
+}}";
         }
 
-        return output;
+
+        private static string GenerateExamples(string type, string source, string target, IDictionary<string, CypherWorkbenchNode> nodes) 
+        {
+            var startNode = nodes[source]?.Label ?? "NOT SET";
+            var endNode = nodes[target]?.Label ?? "NOT SET";
+            return $"/// (:<see cref=\"{startNode}\"/>)-[:{type}]->(:<see cref=\"{endNode}\"/>)";
+        }
     }
 
-    private static string GenerateProperty(IProperty property)
-    {
-        return $"public {property.Type.ToCSharpType()} {property.Name} {{get; set;}}";
-    }
-}
 
-public static class StringExtensions
-{
-    public static string ToUpperCamelCase(this string value)
-    {
-        var split = value.Split("_ ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-        split = split.Select(x => x.ToLowerInvariant()).Select(x => char.ToUpperInvariant(x[0]) + x.Substring(1)).ToArray();
-
-        return string.Join(string.Empty, split);
-    }
 }

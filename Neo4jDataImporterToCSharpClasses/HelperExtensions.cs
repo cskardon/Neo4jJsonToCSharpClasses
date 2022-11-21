@@ -2,6 +2,14 @@
 
 public static class HelperExtensions
 {
+    public static RelationshipNormalized ToNormalized<T>(this IRelationship<T> relationship) 
+        where T:IProperty
+    {
+        var normalized = new RelationshipNormalized { Type = relationship.Type };
+        normalized.AddSourceTargetsAndProperties(relationship.SourceNode!, relationship.TargetNode!, relationship.Properties!.Cast<IProperty>());
+        return normalized;
+    }
+
     public static string ToCSharpType(this string javaType)
     {
         var type = javaType.ToLowerInvariant();

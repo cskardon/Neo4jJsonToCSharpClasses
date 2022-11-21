@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-internal class DataImporterNode : INode<DataImporterProperty>
+public class DataImporterNode : INode<DataImporterProperty>
 {
     /// <inheritdoc />
     [JsonProperty("label")]
