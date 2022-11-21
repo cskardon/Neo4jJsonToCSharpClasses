@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using EnsureThat;
-using Neo4jDataImporterToCSharpClasses;
+using Neo4jJsonToCSharpClasses;
+using Neo4jJsonToCSharpClasses.DataImporter;
 using Newtonsoft.Json;
 
 string filename = null!;
@@ -20,7 +21,7 @@ var relationshipClasses = new StringBuilder(Generate.BaseRelationshipClass + Env
 
 foreach (var nodeSchema in model.DataModel.GraphModel.NodeSchemas)
 {
-    string nodeClass = Generate.Node.Class(nodeSchema.Value);
+    string nodeClass = Generate.OutputNode.Class(nodeSchema.Value);
     nodeClasses.Append(nodeClass).AppendLine();
 }
 
@@ -28,7 +29,7 @@ foreach (var relationshipSchema in model.DataModel.GraphModel.RelationshipSchema
 {
     var startNode = model.DataModel.GraphModel.NodeSchemas[relationshipSchema.Value.SourceNode]?.Label ?? "NOT SET";
     var endNode = model.DataModel.GraphModel.NodeSchemas[relationshipSchema.Value.TargetNode]?.Label ?? "NOT SET";
-    string relationshipClass = Generate.Relationship.Class(relationshipSchema.Value, startNode, endNode);
+    string relationshipClass = Generate.OutputRelationship.Class(relationshipSchema.Value, startNode, endNode);
     relationshipClasses.Append(relationshipClass).AppendLine();
 }
 

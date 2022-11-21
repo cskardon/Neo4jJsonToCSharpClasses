@@ -1,8 +1,8 @@
-﻿namespace Neo4jDataImporterToCSharpClasses;
+﻿namespace Neo4jJsonToCSharpClasses.DataImporter;
 
 using Newtonsoft.Json;
 
-internal class Property
+internal class DataImporterProperty : IProperty
 {
     [JsonProperty("property")]
     public string Name { get; set; }

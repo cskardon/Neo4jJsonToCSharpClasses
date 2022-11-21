@@ -1,4 +1,8 @@
-﻿namespace Neo4jDataImporterToCSharpClasses;
+﻿using Neo4jJsonToCSharpClasses.DataImporter;
+
+namespace Neo4jJsonToCSharpClasses;
+
+using System.Reflection.Metadata.Ecma335;
 
 internal static class Generate
 {
@@ -22,11 +26,11 @@ internal static class Generate
     public static string? Type { get; private set; }
 }";
 
-    internal static class Node
+    internal static class OutputNode
     {
-        internal static string Class(NodeSchema node)
+        internal static string Class(DataImporterNode dataImporterNode)
         {
-            var properties = GenerateProperties(node.Properties).ToList();
+            var properties = (GenerateProperties(dataImporterNode.Properties.Cast<IProperty>().ToList()) ?? Array.Empty<string>()).ToList();
             var propertiesString = (properties.Any()) ? 
                 $@"{string.Join($"{Environment.NewLine}    ", properties)}
 
@@ -34,20 +38,20 @@ internal static class Generate
                 : string.Empty;
 
             return $@"
-public class {node.Label}: NodeBase
+public class {dataImporterNode.Label}: NodeBase
 {{
-    {propertiesString}public {node.Label}()
-        :base(""{node.Label}"") {{}}
+    {propertiesString}public {dataImporterNode.Label}()
+        :base(""{dataImporterNode.Label}"") {{}}
 }}";
         }
     }
     
-    internal static class Relationship
+    internal static class OutputRelationship
     {
-        internal static string Class(RelationshipSchema relationship, string startNode, string endNode)
+        internal static string Class(DataImporterRelationship dataImporterRelationship, string startNode, string endNode)
         {
-            var type = relationship.Type.ToUpperCamelCase();
-            var properties = GenerateProperties(relationship.Properties).ToList();
+            var type = dataImporterRelationship.Type.ToUpperCamelCase();
+            var properties = (GenerateProperties(dataImporterRelationship.Properties.Cast<IProperty>().ToList()) ?? Array.Empty<string>()).ToList();
 
             var propertiesString = (properties.Any()) ? 
                 $@"{string.Join($"{Environment.NewLine}    ", properties)}
@@ -57,17 +61,17 @@ public class {node.Label}: NodeBase
 
             return $@"
 ///<summary>
-/// (:<see cref=""{startNode}""/>)-[:{relationship.Type}]->(:<see cref=""{endNode}""/>)
+/// (:<see cref=""{startNode}""/>)-[:{dataImporterRelationship.Type}]->(:<see cref=""{endNode}""/>)
 ///</summary>
 public class {type}: RelationshipBase
 {{
     {propertiesString}public {type}()
-        :base(""{relationship.Type}"") {{}}
+        :base(""{dataImporterRelationship.Type}"") {{}}
 }}";
         }
     }
     
-    private static IEnumerable<string> GenerateProperties(ICollection<Property> properties)
+    private static IEnumerable<string>? GenerateProperties(ICollection<IProperty>? properties)
     {
         var output = new List<string>();
         foreach (var property in properties)
@@ -78,23 +82,9 @@ public class {type}: RelationshipBase
         return output;
     }
 
-    private static string GenerateProperty(Property property)
+    private static string GenerateProperty(IProperty property)
     {
-        return $"public {JavaTypeToCSharpType(property.Type)} {property.Name} {{get; set;}}";
-    }
-
-    private static string JavaTypeToCSharpType(string type)
-    {
-        switch (type.ToLowerInvariant())
-        {
-            case "string": return "string";
-            case "integer": return "int";
-            case "float": return "float";
-            case "boolean": return "bool";
-            case "datetime": return "DateTime";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, $"Unknown type '{type}' to parse.");
-        }
+        return $"public {property.Type.ToCSharpType()} {property.Name} {{get; set;}}";
     }
 }
 

@@ -1,5 +1,4 @@
-﻿namespace Neo4jDataImporterToCSharpClasses;
-
+﻿namespace Neo4jJsonToCSharpClasses.DataImporter;
 using Newtonsoft.Json;
 
 internal class Neo4jImporter
@@ -17,8 +16,8 @@ internal class DataModel
 internal class GraphModel
 {
     [JsonProperty("nodeSchemas")]
-    public IDictionary<string, NodeSchema> NodeSchemas { get; set; }
+    public IDictionary<string, DataImporterNode> NodeSchemas { get; set; }
 
     [JsonProperty("relationshipSchemas")]
-    public IDictionary<string, RelationshipSchema> RelationshipSchemas { get; set; }
+    public IDictionary<string, DataImporterRelationship> RelationshipSchemas { get; set; }
 }
