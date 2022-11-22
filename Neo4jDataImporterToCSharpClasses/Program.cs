@@ -24,7 +24,10 @@ switch (format.ToLowerInvariant())
     case "cypherworkbench":
         Parser.CypherWorkbench.Parse(contentIn, useUpperCamelCaseForProperties, out nodeClasses, out relationshipClasses);
         break;
-    default: throw new ArgumentOutOfRangeException(nameof(format), format, $"Unsupported format '{format}'!");
+    case "ar":
+    case "arrows":
+    default: 
+        throw new ArgumentOutOfRangeException(nameof(format), format, $"Unsupported format '{format}'!");
 }
 
 await WriteFile(nodeClasses.ToString(), folderOut, true);

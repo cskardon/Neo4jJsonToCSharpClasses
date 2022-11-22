@@ -32,41 +32,50 @@ public static class Parser
     {
         var relationshipClasses = Generate.StartRelationshipsClassFile;
         foreach (var relationshipClass in
-                 normalizedRelationships.Select(normalizedRelationship => Generate.OutputRelationship.ClassX<T, TP>(normalizedRelationship.Value, nodes, useUpperCamelCaseForProperties)))
+                 normalizedRelationships.Select(normalizedRelationship => Generate.OutputRelationship.Class<T, TP>(normalizedRelationship.Value, nodes, useUpperCamelCaseForProperties)))
             relationshipClasses.Append(relationshipClass);
 
         return relationshipClasses;
     }
 
+    private static StringBuilder ParseNodes<T, TP>(IDictionary<string, T> model, bool useUpperCamelCaseForProperties)
+        where TP : IProperty
+        where T : INode<TP>
+    {
+        var nodeClasses = Generate.StartNodeClassFile;
+        foreach (var node in model)
+        {
+            var nodeClass = Generate.OutputNode.Class<T, TP>(node.Value, useUpperCamelCaseForProperties);
+            nodeClasses.Append(nodeClass).AppendLine();
+        }
+
+        return nodeClasses;
+    }
+
+    private static StringBuilder ParseRelationships<TRel, TNode, TProperty>(IDictionary<string, TNode> nodes, IDictionary<string, TRel> relationships, bool useUpperCamelCaseForProperties)
+        where TProperty : IProperty
+        where TNode : INode<TProperty>
+        where TRel : IRelationship<TProperty>
+    {
+        var normalizedRelationships = GetNormalizedRelationships<TRel, TProperty>(relationships.Values);
+        return ParseNormalizedRelationships<TNode, TProperty>(normalizedRelationships, nodes, useUpperCamelCaseForProperties);
+    }
 
     public static class CypherWorkbench
     {
+        private static Version VersionWorksWith = new(1, 3, 0);
+
         public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
         {
             var model = JsonConvert.DeserializeObject<Neo4jJsonToCSharpClasses.CypherWorkbench.CypherWorkbench>(contentIn);
             if (model == null)
-                throw new InvalidDataException("The file could not be parsed as a JSON file.");
+                throw new InvalidDataException("CypherWorkbench: The file could not be parsed as a JSON file.");
 
-            nodeClasses = ParseNodes(model, useUpperCamelCaseForProperties);
-            relationshipClasses = ParseRelationships(model, useUpperCamelCaseForProperties);
-        }
+            if (model.Metadata.Version != VersionWorksWith)
+                Console.WriteLine($"This is set to work with {VersionWorksWith} of the Cypher Workbench JSON - double check results!");
 
-        private static StringBuilder ParseNodes(Neo4jJsonToCSharpClasses.CypherWorkbench.CypherWorkbench model, bool useUpperCamelCaseForProperties)
-        {
-            var nodeClasses = Generate.StartNodeClassFile;
-            foreach (var node in model!.DataModel!.Nodes!)
-            {
-                var nodeClass = Generate.OutputNode.Class(node.Value, useUpperCamelCaseForProperties);
-                nodeClasses.Append(nodeClass).AppendLine();
-            }
-
-            return nodeClasses;
-        }
-
-        private static StringBuilder ParseRelationships(Neo4jJsonToCSharpClasses.CypherWorkbench.CypherWorkbench model, bool useUpperCamelCaseForProperties)
-        {
-            var normalizedRelationships = GetNormalizedRelationships<CypherWorkbenchRelationship, CypherWorkbenchProperty>(model.DataModel.Relationships.Values);
-            return ParseNormalizedRelationships<CypherWorkbenchNode, CypherWorkbenchProperty>(normalizedRelationships, model.DataModel.Nodes, useUpperCamelCaseForProperties);
+            nodeClasses = ParseNodes<CypherWorkbenchNode, CypherWorkbenchProperty>(model.DataModel.Nodes, useUpperCamelCaseForProperties);
+            relationshipClasses = ParseRelationships<CypherWorkbenchRelationship, CypherWorkbenchNode, CypherWorkbenchProperty>(model.DataModel.Nodes, model.DataModel.Relationships, useUpperCamelCaseForProperties);
         }
     }
 
@@ -75,35 +84,11 @@ public static class Parser
         public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
         {
             var model = JsonConvert.DeserializeObject<Neo4jImporter>(contentIn);
-            
-            nodeClasses = ParseNodes(model, useUpperCamelCaseForProperties);
-            relationshipClasses = ParseRelationships(model, useUpperCamelCaseForProperties);
-        }
+            if (model == null)
+                throw new InvalidDataException("DataImporter: The file could not be parsed as a JSON file.");
 
-        private static StringBuilder ParseNodes(Neo4jImporter model, bool useUpperCamelCaseForProperties)
-        {
-            var nodeClasses = Generate.StartNodeClassFile;
-            foreach (var nodeSchema in model.DataModel.GraphModel.Nodes)
-            {
-                string nodeClass = Generate.OutputNode.Class(nodeSchema.Value, useUpperCamelCaseForProperties);
-                nodeClasses.Append(nodeClass).AppendLine();
-            }
-
-            return nodeClasses;
-        }
-
-        private static StringBuilder ParseRelationships(Neo4jImporter model, bool useUpperCamelCaseForProperties)
-        {
-            var relationshipClasses = Generate.StartRelationshipsClassFile;
-            foreach (var relationshipSchema in model.DataModel.GraphModel.Relationships)
-            {
-                var startNode = model.DataModel.GraphModel.Nodes[relationshipSchema.Value.SourceNode]?.Label ?? "NOT SET";
-                var endNode = model.DataModel.GraphModel.Nodes[relationshipSchema.Value.TargetNode]?.Label ?? "NOT SET";
-                string relationshipClass = Generate.OutputRelationship.Class<DataImporterRelationship, DataImporterProperty>(relationshipSchema.Value, startNode, endNode, useUpperCamelCaseForProperties);
-                relationshipClasses.Append(relationshipClass).AppendLine();
-            }
-
-            return relationshipClasses;
+            nodeClasses = ParseNodes<DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, useUpperCamelCaseForProperties);
+            relationshipClasses = ParseRelationships<DataImporterRelationship, DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, model.DataModel.GraphModel.Relationships, useUpperCamelCaseForProperties);
         }
     }
 }
