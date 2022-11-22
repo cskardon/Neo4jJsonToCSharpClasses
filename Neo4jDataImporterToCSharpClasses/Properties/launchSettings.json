@@ -1,8 +1,16 @@
 {
   "profiles": {
-    "Neo4jDataImporterToCSharpClasses": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "DataImporter": {
       "commandName": "Project",
-      "commandLineArgs": "--fileIn \"d:\\temp\\test-importer-model.json\" --folderOut \"d:\\temp\\generated\""
+      "commandLineArgs": "--fileIn \"d:\\temp\\test-importer-model.json\" --folderOut \"d:\\temp\\generated\" --format \"dataimporter\""
+    },
+    "CypherWorkbench": {
+      "commandName": "Project",
+      "commandLineArgs": "--fileIn \"d:\\temp\\test-cypher-workbench.json\" --folderOut \"d:\\temp\\generated\" --format \"cypherworkbench\""
     }
   }
 }
