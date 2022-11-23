@@ -18,6 +18,13 @@ Just some blurb about how to use the app.
 * --format <FILE TYPE>
   * `--format dataImporter` will attempt to parse a Data Importer generated JSON file (alt: `--format di`)
   * `--format cypherworkbench` will attempt to parse a Cypher Workbench generated JSON file (alt: `--format cw`)
+  * `--format arrows` will attempt to parse an [Arrows](https://arrows.app) generated JSON file (alt: `--format ar`)
+
+>**NB** - Arrows files (in this version) will be parsed with the following restrictions:
+>
+>* Properties are interpreted in a `name:Type` fashion, e.g. `startDate : DateTime`, doing this the other way around will likely throw an exception about being unable to parse the datatype.
+>* Captions are used for labels - this fits in with the way the Data Importer does it. Future releases might allow this to be changed.
+
 * --useCamelCaseProperties <TRUE|FALSE>
   * if `true` (default) the parser will output classes with properties using Upper Camel Case - the standard C# code guidelines
   * if `false` the parser will output classes with the _same_ case as the `fileIn` file

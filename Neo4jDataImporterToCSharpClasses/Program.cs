@@ -26,6 +26,11 @@ switch (format.ToLowerInvariant())
         break;
     case "ar":
     case "arrows":
+        Console.WriteLine("**NOTE FOR ARROWS FILES**");
+        Console.WriteLine("\t* This makes the assumption properties are defined as 'name:Type', if you have this the other way around this version will break!");
+        Console.WriteLine("\t* This uses 'captions' for labels in this version.");
+        Parser.Arrows.Parse(contentIn,useUpperCamelCaseForProperties,out nodeClasses,out relationshipClasses);
+        break;
     default: 
         throw new ArgumentOutOfRangeException(nameof(format), format, $"Unsupported format '{format}'!");
 }
