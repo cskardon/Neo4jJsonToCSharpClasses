@@ -2,15 +2,15 @@
 
 using Newtonsoft.Json;
 
-public class CypherWorkbenchNode : INode<CypherWorkbenchProperty>
+public class CypherWorkbenchNode : BaseNode<CypherWorkbenchProperty>
 {
+    [JsonProperty("properties")]
+    protected IDictionary<string, CypherWorkbenchProperty>? PropertiesDictionary { get; set; }
+
     /// <inheritdoc />
     [JsonProperty("label")]
-    public string? Label { get; set; }
-
-    public ICollection<CypherWorkbenchProperty>? Properties => PropertiesDictionary?.Values ?? Array.Empty<CypherWorkbenchProperty>();
+    public override string? Label { get; set; }
 
     /// <inheritdoc />
-    [JsonProperty("properties")]
-    public IDictionary<string, CypherWorkbenchProperty>? PropertiesDictionary { get; set; }
+    public override ICollection<CypherWorkbenchProperty>? Properties => PropertiesDictionary.Values ?? Array.Empty<CypherWorkbenchProperty>();
 }

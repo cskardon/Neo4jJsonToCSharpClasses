@@ -7,9 +7,10 @@ using Newtonsoft.Json;
 
 public static class Parser
 {
-    private static IDictionary<string, RelationshipNormalized> GetNormalizedRelationships<T, TP>(IEnumerable<T> relationships) 
-        where TP: IProperty 
-        where T : IRelationship<TP>
+    #region Relationsips
+    private static IDictionary<string, RelationshipNormalized> GetNormalizedRelationships<TRelationship, TProperty>(IEnumerable<TRelationship> relationships) 
+        where TProperty: IProperty 
+        where TRelationship : IRelationship<TProperty>
     {
         var normalizedRelationships = new Dictionary<string, RelationshipNormalized>();
         foreach (var relationship in relationships)
@@ -26,40 +27,64 @@ public static class Parser
         return normalizedRelationships;
     }
 
-    private static StringBuilder ParseNormalizedRelationships<T, TP>(IDictionary<string, RelationshipNormalized> normalizedRelationships, IDictionary<string, T> nodes, bool useUpperCamelCaseForProperties)
-        where TP: IProperty
-        where T : INode<TP>
+    private static StringBuilder ParseNormalizedRelationships<TRelationship, TProperty>(IDictionary<string, RelationshipNormalized> normalizedRelationships, IDictionary<string, TRelationship> nodes, bool useUpperCamelCaseForProperties)
+        where TProperty: IProperty
+        where TRelationship : INode<TProperty>
     {
         var relationshipClasses = Generate.StartRelationshipsClassFile;
         foreach (var relationshipClass in
-                 normalizedRelationships.Select(normalizedRelationship => Generate.OutputRelationship.Class<T, TP>(normalizedRelationship.Value, nodes, useUpperCamelCaseForProperties)))
+                 normalizedRelationships.Select(normalizedRelationship => Generate.OutputRelationship.Class<TRelationship, TProperty>(normalizedRelationship.Value, nodes, useUpperCamelCaseForProperties)))
             relationshipClasses.Append(relationshipClass);
 
         return relationshipClasses;
     }
 
-    private static StringBuilder ParseNodes<T, TP>(IDictionary<string, T> model, bool useUpperCamelCaseForProperties)
-        where TP : IProperty
-        where T : INode<TP>
+    private static StringBuilder ParseRelationships<TRelationship, TNode, TProperty>(IDictionary<string, TNode> nodes, IDictionary<string, TRelationship> relationships, bool useUpperCamelCaseForProperties)
+        where TProperty : IProperty
+        where TNode : INode<TProperty>
+        where TRelationship : IRelationship<TProperty>
     {
+        var normalizedRelationships = GetNormalizedRelationships<TRelationship, TProperty>(relationships.Values);
+        return ParseNormalizedRelationships<TNode, TProperty>(normalizedRelationships, nodes, useUpperCamelCaseForProperties);
+    }
+    #endregion Relationsips
+
+    #region Nodes
+    private static StringBuilder ParseNodes<TNode, TProperty>(IDictionary<string, TNode> model, bool useUpperCamelCaseForProperties)
+        where TProperty : IProperty
+        where TNode : INode<TProperty>
+    {
+        var compressed = CompressNodes<TNode, TProperty>(model);
+
         var nodeClasses = Generate.StartNodeClassFile;
-        foreach (var node in model)
+        foreach (var node in compressed)
         {
-            var nodeClass = Generate.OutputNode.Class<T, TP>(node.Value, useUpperCamelCaseForProperties);
+            var nodeClass = Generate.OutputNode.Class(node.Value, useUpperCamelCaseForProperties);
             nodeClasses.Append(nodeClass).AppendLine();
         }
 
         return nodeClasses;
     }
 
-    private static StringBuilder ParseRelationships<TRel, TNode, TProperty>(IDictionary<string, TNode> nodes, IDictionary<string, TRel> relationships, bool useUpperCamelCaseForProperties)
+    private static IDictionary<string, NormalizedNode> CompressNodes<TNode, TProperty>(IDictionary<string, TNode> nodes)
         where TProperty : IProperty
         where TNode : INode<TProperty>
-        where TRel : IRelationship<TProperty>
     {
-        var normalizedRelationships = GetNormalizedRelationships<TRel, TProperty>(relationships.Values);
-        return ParseNormalizedRelationships<TNode, TProperty>(normalizedRelationships, nodes, useUpperCamelCaseForProperties);
+        var output = new Dictionary<string, NormalizedNode>();
+
+        foreach (var nodeWithKey in nodes)
+        {
+            var labelLower = nodeWithKey.Value.Label.ToLowerInvariant();
+            if(!output.ContainsKey(labelLower))
+                output.Add(labelLower, new NormalizedNode(nodeWithKey.Value.Label));
+
+            output[labelLower].Merge<TNode, TProperty>(nodeWithKey.Key, nodeWithKey.Value);
+        }
+
+        return output;
     }
+
+    #endregion Nodes
 
     public static class CypherWorkbench
     {
