@@ -40,11 +40,9 @@ public static class Generate
 
     public static class OutputNode
     {
-        public static string Class<T, TP>(T node, bool upperCamelCaseProperties)
-            where TP : IProperty
-            where T : INode<TP>
+        public static string Class(NormalizedNode node, bool upperCamelCaseProperties)
         {
-            var properties = (GenerateProperties(node.Properties.Cast<IProperty>().ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
+            var properties = (GenerateProperties(node.Properties.ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
             var propertiesString = properties.Any()
                 ? $@"{string.Join($"{Environment.NewLine}    ", properties)}
 
@@ -62,14 +60,14 @@ public class {node.Label}: NodeBase
 
     public static class OutputRelationship
     {
-        public static string Class<T, TP>(RelationshipNormalized relationship, IDictionary<string, T> nodes, bool upperCamelCaseProperties)
-            where TP : IProperty
-            where T : INode<TP>
+        public static string Class<TRelationship, TProperty>(RelationshipNormalized relationship, IDictionary<string, TRelationship> nodes, bool upperCamelCaseProperties)
+            where TProperty : IProperty
+            where TRelationship : INode<TProperty>
         {
             var type = relationship.Type.ToUpperCamelCase();
             var properties = (GenerateProperties(relationship.Properties.ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
 
-            var examples = relationship.SourceAndTargets.Select(x => GenerateExamplesX<T, TP>(relationship.Type, x.SourceNode, x.TargetNode, nodes));
+            var examples = relationship.SourceAndTargets.Select(x => GenerateExamples<TRelationship, TProperty>(relationship.Type, x.SourceNode, x.TargetNode, nodes));
             var propertiesString = properties.Any()
                 ? $@"{string.Join($"{Environment.NewLine}    ", properties)}
 
@@ -87,9 +85,9 @@ public class {type}: RelationshipBase
 }}";
         }
 
-        private static string GenerateExamplesX<T, TP>(string type, string source, string target, IDictionary<string, T> nodes)
-            where TP : IProperty
-            where T : INode<TP>
+        private static string GenerateExamples<TRelationship, TProperty>(string type, string source, string target, IDictionary<string, TRelationship> nodes)
+            where TProperty : IProperty
+            where TRelationship : INode<TProperty>
         {
             var startNode = nodes[source]?.Label ?? "NOT SET";
             var endNode = nodes[target]?.Label ?? "NOT SET";

@@ -2,13 +2,13 @@
 
 using Newtonsoft.Json;
 
-public class DataImporterNode : INode<DataImporterProperty>
+public class DataImporterNode : BaseNode<DataImporterProperty>
 {
     /// <inheritdoc />
     [JsonProperty("label")]
-    public string? Label { get; set; }
+    public override string? Label { get; set; }
 
     /// <inheritdoc />
     [JsonProperty("properties")]
-    public ICollection<DataImporterProperty>? Properties { get; set; }
+    public override ICollection<DataImporterProperty>? Properties { get; }
 }
