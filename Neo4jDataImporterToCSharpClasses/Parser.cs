@@ -116,4 +116,17 @@ public static class Parser
             relationshipClasses = ParseRelationships<DataImporterRelationship, DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, model.DataModel.GraphModel.Relationships, useUpperCamelCaseForProperties);
         }
     }
+
+    public static class Arrows
+    {
+        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
+        {
+            var model = JsonConvert.DeserializeObject<ArrowsDocument>(contentIn);
+            if (model == null)
+                throw new InvalidDataException("Arrows: The file could not be parsed as a JSON file.");
+
+            nodeClasses = ParseNodes<ArrowsNode, ArrowsProperty>(model.Nodes, useUpperCamelCaseForProperties);
+            relationshipClasses = ParseRelationships<ArrowsRelationship, ArrowsNode, ArrowsProperty>(model.Nodes, model.Relationships, useUpperCamelCaseForProperties);
+        }
+    }
 }

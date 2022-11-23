@@ -11,6 +11,10 @@
     "CypherWorkbench": {
       "commandName": "Project",
       "commandLineArgs": "--fileIn \"d:\\temp\\test-cypher-workbench.json\" --folderOut \"d:\\temp\\generated\" --format \"cypherworkbench\""
+    },
+    "Arrows": {
+      "commandName": "Project",
+      "commandLineArgs": "--fileIn \"d:\\temp\\test-arrows.json\" --folderOut \"d:\\temp\\generated\" --format \"arrows\""
     }
   }
 }
