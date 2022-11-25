@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 
-
 public class DataImporterRelationship : IRelationship<DataImporterProperty>
 {
     [JsonProperty("type")]
@@ -16,7 +15,5 @@ public class DataImporterRelationship : IRelationship<DataImporterProperty>
     
     [JsonProperty("properties")]
     public ICollection<DataImporterProperty>? Properties { get; set; }
-
-
 }
 

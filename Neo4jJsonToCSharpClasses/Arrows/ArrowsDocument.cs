@@ -17,6 +17,9 @@ public class ArrowsDocument
 
 public class ArrowsNode : BaseNode<ArrowsProperty>
 {
+    ///<summary>
+    /// (:<see cref="BaseNode{T}"/>)-[:MEME_IP]->(:<see cref="ArrowsNode"/>)
+    ///</summary>
     [JsonProperty("id")]
     public string Id { get; set; }
 

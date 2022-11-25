@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Neo4jDataImporterToCSharpClasses\Neo4jJsonToCSharpClasses.csproj" />
+    <ProjectReference Include="..\Neo4jJsonToCSharpClasses\Neo4jJsonToCSharpClasses.csproj" />
   </ItemGroup>
 
 </Project>

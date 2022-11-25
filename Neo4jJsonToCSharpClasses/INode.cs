@@ -10,6 +10,7 @@ public abstract class BaseNode<T> : INode<T>
     public abstract ICollection<T>? Properties { get; }
 }
 
+
 public interface INode<T>
     where T : IProperty
 {

@@ -15,6 +15,10 @@
     "Arrows": {
       "commandName": "Project",
       "commandLineArgs": "--fileIn \"d:\\temp\\test-arrows.json\" --folderOut \"d:\\temp\\generated\" --format \"arrows\""
+    },
+    "JurassicPark": {
+      "commandName": "Project",
+      "commandLineArgs": "--fileIn \"d:\\temp\\jurassic-park.json\" --folderOut \"d:\\temp\\generatedJp\" --format \"dataimporter\""
     }
   }
 }

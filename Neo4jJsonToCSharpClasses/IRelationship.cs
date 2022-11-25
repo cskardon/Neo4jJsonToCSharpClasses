@@ -46,6 +46,9 @@ public class NormalizedNode : INode<IProperty>
         if(!NodeIds.Contains(key))
             NodeIds.Add(key);
 
+        if (node.Properties == null || !node.Properties.Any())
+            return;
+
         foreach (var property in node.Properties)
         {
             var existing = Properties.SingleOrDefault(x => string.Equals(x.Name, property.Name, StringComparison.InvariantCultureIgnoreCase));
