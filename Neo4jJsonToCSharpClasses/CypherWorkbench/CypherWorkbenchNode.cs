@@ -12,5 +12,9 @@ public class CypherWorkbenchNode : BaseNode<CypherWorkbenchProperty>
     public override string? Label { get; set; }
 
     /// <inheritdoc />
-    public override ICollection<CypherWorkbenchProperty>? Properties => PropertiesDictionary.Values ?? Array.Empty<CypherWorkbenchProperty>();
+    public override ICollection<CypherWorkbenchProperty>? Properties
+    {
+        get => PropertiesDictionary.Values;
+        set => throw new NotImplementedException();
+    }
 }

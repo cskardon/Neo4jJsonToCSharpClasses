@@ -106,11 +106,16 @@ public static class Parser
 
     public static class DataImporter
     {
+        private static Version VersionWorksWith = new(0, 7, 0);
+
         public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
         {
             var model = JsonConvert.DeserializeObject<Neo4jImporter>(contentIn);
             if (model == null)
                 throw new InvalidDataException("DataImporter: The file could not be parsed as a JSON file.");
+
+            if (model.Version != VersionWorksWith)
+                Console.WriteLine($"This is set to work with {VersionWorksWith} of the Cypher Workbench JSON - double check results!");
 
             nodeClasses = ParseNodes<DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, useUpperCamelCaseForProperties);
             relationshipClasses = ParseRelationships<DataImporterRelationship, DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, model.DataModel.GraphModel.Relationships, useUpperCamelCaseForProperties);

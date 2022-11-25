@@ -7,7 +7,7 @@ public abstract class BaseNode<T> : INode<T>
     public abstract string? Label { get; set; }
 
     /// <inheritdoc />
-    public abstract ICollection<T>? Properties { get; }
+    public abstract ICollection<T>? Properties { get; set; }
 }
 
 

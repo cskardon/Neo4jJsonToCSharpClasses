@@ -33,7 +33,11 @@ public class ArrowsNode : BaseNode<ArrowsProperty>
     protected IDictionary<string, string> FileProperties { get; set; } = new Dictionary<string, string>();
 
     /// <inheritdoc />
-    public override ICollection<ArrowsProperty>? Properties => FileProperties.Select(x => new ArrowsProperty { Name = x.Key, Type = x.Value }).ToList();
+    public override ICollection<ArrowsProperty>? Properties
+    {
+        get => FileProperties.Select(x => new ArrowsProperty {Name = x.Key, Type = x.Value}).ToList();
+        set => throw new NotImplementedException();
+    }
 }
 
 public class ArrowsProperty : IProperty

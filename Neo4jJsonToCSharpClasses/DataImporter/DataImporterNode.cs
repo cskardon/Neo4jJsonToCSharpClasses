@@ -10,5 +10,5 @@ public class DataImporterNode : BaseNode<DataImporterProperty>
 
     /// <inheritdoc />
     [JsonProperty("properties")]
-    public override ICollection<DataImporterProperty>? Properties { get; }
+    public override ICollection<DataImporterProperty>? Properties { get; set; }
 }
