@@ -42,6 +42,7 @@ public static class Generate
     {
         public static string Class(NormalizedNode node, bool upperCamelCaseProperties)
         {
+            var className = $"{node.Label.ToUpperCamelCase()}Node";
             var properties = (GenerateProperties(node.Properties.ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
             var propertiesString = properties.Any()
                 ? $@"{string.Join($"{Environment.NewLine}    ", properties)}
@@ -50,9 +51,9 @@ public static class Generate
                 : string.Empty;
 
             return $@"
-public class {node.Label}: NodeBase
+public class {className}: NodeBase
 {{
-    {propertiesString}public {node.Label}()
+    {propertiesString}public {className}()
         :base(""{node.Label}"") {{}}
 }}";
         }
@@ -64,7 +65,7 @@ public class {node.Label}: NodeBase
             where TProperty : IProperty
             where TRelationship : INode<TProperty>
         {
-            var type = relationship.Type.ToUpperCamelCase();
+            var type = $"{relationship.Type.ToUpperCamelCase()}Relationship";
             var properties = (GenerateProperties(relationship.Properties.ToList(), upperCamelCaseProperties) ?? Array.Empty<string>()).ToList();
 
             var examples = relationship.SourceAndTargets.Select(x => GenerateExamples<TRelationship, TProperty>(relationship.Type, x.SourceNode, x.TargetNode, nodes));
