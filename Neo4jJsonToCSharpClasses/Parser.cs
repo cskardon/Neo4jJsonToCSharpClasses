@@ -27,24 +27,32 @@ public static class Parser
         return normalizedRelationships;
     }
 
-    private static StringBuilder ParseNormalizedRelationships<TRelationship, TProperty>(IDictionary<string, RelationshipNormalized> normalizedRelationships, IDictionary<string, TRelationship> nodes, bool useUpperCamelCaseForProperties)
+    private static StringBuilder ParseNormalizedRelationships<TNode, TProperty>(IDictionary<string, RelationshipNormalized> normalizedRelationships, IDictionary<string, TNode> nodes, bool useUpperCamelCaseForProperties)
         where TProperty: IProperty
-        where TRelationship : INode<TProperty>
+        where TNode : INode<TProperty>
     {
         var relationshipClasses = Generate.StartRelationshipsClassFile;
         foreach (var relationshipClass in
-                 normalizedRelationships.Select(normalizedRelationship => Generate.OutputRelationship.Class<TRelationship, TProperty>(normalizedRelationship.Value, nodes, useUpperCamelCaseForProperties)))
+                 normalizedRelationships.Select(normalizedRelationship => Generate.OutputRelationship.Class<TNode, TProperty>(normalizedRelationship.Value, nodes, useUpperCamelCaseForProperties)))
             relationshipClasses.Append(relationshipClass);
 
         return relationshipClasses;
     }
 
-    private static StringBuilder ParseRelationships<TRelationship, TNode, TProperty>(IDictionary<string, TNode> nodes, IDictionary<string, TRelationship> relationships, bool useUpperCamelCaseForProperties)
+    private static StringBuilder ParseNormalizedRelationshipsIntoConstClass<TNode, TProperty>(IDictionary<string, RelationshipNormalized> normalizedRelationships, IDictionary<string, TNode> nodes)
+        where TProperty : IProperty
+        where TNode : INode<TProperty>
+    {
+        return Generate.OutputRelationship.Consts<TNode, TProperty>(normalizedRelationships.Values, nodes);
+    }
+
+    private static StringBuilder ParseRelationships<TRelationship, TNode, TProperty>(IDictionary<string, TNode> nodes, IDictionary<string, TRelationship> relationships, bool useUpperCamelCaseForProperties, out StringBuilder constClass)
         where TProperty : IProperty
         where TNode : INode<TProperty>
         where TRelationship : IRelationship<TProperty>
     {
         var normalizedRelationships = GetNormalizedRelationships<TRelationship, TProperty>(relationships.Values);
+        constClass = ParseNormalizedRelationshipsIntoConstClass<TNode, TProperty>(normalizedRelationships, nodes);
         return ParseNormalizedRelationships<TNode, TProperty>(normalizedRelationships, nodes, useUpperCamelCaseForProperties);
     }
     #endregion Relationsips
@@ -90,7 +98,7 @@ public static class Parser
     {
         private static Version VersionWorksWith = new(1, 3, 0);
 
-        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
+        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses, out StringBuilder constClass)
         {
             var model = JsonConvert.DeserializeObject<Neo4jJsonToCSharpClasses.CypherWorkbench.CypherWorkbench>(contentIn);
             if (model == null)
@@ -100,7 +108,7 @@ public static class Parser
                 Console.WriteLine($"This is set to work with {VersionWorksWith} of the Cypher Workbench JSON - double check results!");
 
             nodeClasses = ParseNodes<CypherWorkbenchNode, CypherWorkbenchProperty>(model.DataModel.Nodes, useUpperCamelCaseForProperties);
-            relationshipClasses = ParseRelationships<CypherWorkbenchRelationship, CypherWorkbenchNode, CypherWorkbenchProperty>(model.DataModel.Nodes, model.DataModel.Relationships, useUpperCamelCaseForProperties);
+            relationshipClasses = ParseRelationships<CypherWorkbenchRelationship, CypherWorkbenchNode, CypherWorkbenchProperty>(model.DataModel.Nodes, model.DataModel.Relationships, useUpperCamelCaseForProperties, out constClass);
         }
     }
 
@@ -108,7 +116,7 @@ public static class Parser
     {
         private static Version VersionWorksWith = new(0, 7, 0);
 
-        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
+        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses, out StringBuilder constClass)
         {
             var model = JsonConvert.DeserializeObject<Neo4jImporter>(contentIn);
             if (model == null)
@@ -118,20 +126,21 @@ public static class Parser
                 Console.WriteLine($"This is set to work with {VersionWorksWith} of the Cypher Workbench JSON - double check results!");
 
             nodeClasses = ParseNodes<DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, useUpperCamelCaseForProperties);
-            relationshipClasses = ParseRelationships<DataImporterRelationship, DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, model.DataModel.GraphModel.Relationships, useUpperCamelCaseForProperties);
+            relationshipClasses = ParseRelationships<DataImporterRelationship, DataImporterNode, DataImporterProperty>(model.DataModel.GraphModel.Nodes, model.DataModel.GraphModel.Relationships, useUpperCamelCaseForProperties, out constClass);
+
         }
     }
 
     public static class Arrows
     {
-        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses)
+        public static void Parse(string contentIn, bool useUpperCamelCaseForProperties, out StringBuilder nodeClasses, out StringBuilder relationshipClasses, out StringBuilder constClass)
         {
             var model = JsonConvert.DeserializeObject<ArrowsDocument>(contentIn);
             if (model == null)
                 throw new InvalidDataException("Arrows: The file could not be parsed as a JSON file.");
 
             nodeClasses = ParseNodes<ArrowsNode, ArrowsProperty>(model.Nodes, useUpperCamelCaseForProperties);
-            relationshipClasses = ParseRelationships<ArrowsRelationship, ArrowsNode, ArrowsProperty>(model.Nodes, model.Relationships, useUpperCamelCaseForProperties);
+            relationshipClasses = ParseRelationships<ArrowsRelationship, ArrowsNode, ArrowsProperty>(model.Nodes, model.Relationships, useUpperCamelCaseForProperties, out constClass);
         }
     }
 }

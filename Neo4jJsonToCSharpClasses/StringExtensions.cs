@@ -9,6 +9,8 @@ public static class StringExtensions
             RegexOptions.Compiled | RegexOptions.CultureInvariant
             );
 
+    private static string[] TwoLetterWordsToCaseCorrectly = { "in", "as", "on", "is" };
+
     public static string ToUpperCamelCase(this string value)
     {
         if(string.IsNullOrWhiteSpace(value)) return value;
@@ -19,7 +21,11 @@ public static class StringExtensions
 
         for (var i = 0; i < split.Length; i++)
         {
-            if (split[i].Length <= 2) continue;
+            if (split[i].Length <= 2)
+            {
+                if(!TwoLetterWordsToCaseCorrectly.Contains(split[i].ToLowerInvariant()))
+                    continue;
+            }
             split[i] = $"{char.ToUpperInvariant(split[i][0])}{split[i].ToLowerInvariant()[1..]}";
         }
 
