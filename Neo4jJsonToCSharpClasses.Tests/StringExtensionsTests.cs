@@ -22,10 +22,11 @@ public class StringExtensionsTests
         [InlineData("TestMethodMultiple", "TestMethodMultiple")]
         [InlineData("MethodAB", "MethodAB")]
         [InlineData("MethodABC", "MethodAbc")]
+        [InlineData("IN_FOO", "InFoo")]
+        [InlineData("IO_FOO", "IOFoo")]
         public void ReturnsExpectedUpperCasing(string input, string expected)
         {
             input.ToUpperCamelCase().Should().Be(expected);
         }
-
     }
 }

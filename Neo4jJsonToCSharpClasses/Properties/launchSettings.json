@@ -19,6 +19,10 @@
     "JurassicPark": {
       "commandName": "Project",
       "commandLineArgs": "--fileIn \"d:\\temp\\jurassic-park.json\" --folderOut \"d:\\temp\\generatedJp\" --format \"dataimporter\""
+    },
+    "Jurassic Park - Not UC": {
+      "commandName": "Project",
+      "commandLineArgs": "--fileIn \"d:\\temp\\jurassic-park.json\" --folderOut \"d:\\temp\\generatedJp\" --format \"dataimporter\" --ucc false"
     }
   }
 }

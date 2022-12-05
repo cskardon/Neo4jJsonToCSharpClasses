@@ -12,35 +12,35 @@ if (!Directory.Exists(folderOut))
     Directory.CreateDirectory(folderOut);
 
 var contentIn = await ReadFile();
-StringBuilder nodeClasses, relationshipClasses;
+StringBuilder nodeClasses, relationshipClasses, constClass;
 
 switch (format.ToLowerInvariant())
 {
     case "di":
     case "dataimporter":
-        Parser.DataImporter.Parse(contentIn, useUpperCamelCaseForProperties, out nodeClasses, out relationshipClasses);
+        Parser.DataImporter.Parse(contentIn, useUpperCamelCaseForProperties, out nodeClasses, out relationshipClasses, out constClass);
         break;
     case "cw":
     case "cypherworkbench":
-        Parser.CypherWorkbench.Parse(contentIn, useUpperCamelCaseForProperties, out nodeClasses, out relationshipClasses);
+        Parser.CypherWorkbench.Parse(contentIn, useUpperCamelCaseForProperties, out nodeClasses, out relationshipClasses, out constClass);
         break;
     case "ar":
     case "arrows":
         Console.WriteLine("**NOTE FOR ARROWS FILES**");
         Console.WriteLine("\t* This makes the assumption properties are defined as 'name:Type', if you have this the other way around this version will break!");
         Console.WriteLine("\t* This uses 'captions' for labels in this version.");
-        Parser.Arrows.Parse(contentIn,useUpperCamelCaseForProperties,out nodeClasses,out relationshipClasses);
+        Parser.Arrows.Parse(contentIn,useUpperCamelCaseForProperties,out nodeClasses,out relationshipClasses, out constClass);
         break;
     default: 
         throw new ArgumentOutOfRangeException(nameof(format), format, $"Unsupported format '{format}'!");
 }
 
-await WriteFile(nodeClasses.ToString(), folderOut, true);
-await WriteFile(relationshipClasses.ToString(), folderOut, false);
+await WriteFile(nodeClasses.ToString(), folderOut, "Nodes.cs");
+await WriteFile(relationshipClasses.ToString(), folderOut, "Relationships.cs");
+await WriteFile(constClass.ToString(), folderOut, "RelationshipTypes.cs");
 
-async Task WriteFile(string content, string folder, bool isNode)
+async Task WriteFile(string content, string folder, string filenameOut)
 {
-    var filenameOut = isNode ? "Nodes.cs" : "Relationships.cs";
     await File.WriteAllTextAsync(Path.Combine(folder, filenameOut), content);
 }
 
