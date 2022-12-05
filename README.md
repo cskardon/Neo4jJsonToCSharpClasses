@@ -4,6 +4,7 @@ Takes a `JSON` file generated from the [Neo4j Data Importer](http://data-importe
 
 * `Nodes.cs` 
 * `Relationships.cs`
+* `RelationshipTypes.cs`
 
 files containing C# POCO (**P**lain **O**ld **C**LR **O**bjects) for each of the Nodes and Relationships defined in the model.
 
@@ -11,7 +12,7 @@ This should work on Windows, Linux and Mac as long as you have the DotNet 6.0 SD
 
 # Usage
 
-Just some blurb about how to use the app.
+Run the application against a JSON file created by a Neo4j tool and get a selection of `C#` classes.
 
 ## Arguments
 
@@ -25,7 +26,7 @@ Just some blurb about how to use the app.
 >* Properties are interpreted in a `name:Type` fashion, e.g. `startDate : DateTime`, doing this the other way around will likely throw an exception about being unable to parse the datatype.
 >* Captions are used for labels - this fits in with the way the Data Importer does it. Future releases might allow this to be changed.
 
-* --useCamelCaseProperties <TRUE|FALSE>
+* --useCamelCaseProperties <TRUE|FALSE> (alt: `--ucc <TRUE|FALSE>`)
   * if `true` (default) the parser will output classes with properties using Upper Camel Case - the standard C# code guidelines
   * if `false` the parser will output classes with the _same_ case as the `fileIn` file
 * --fileIn <FILE>
